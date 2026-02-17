@@ -1,0 +1,1732 @@
+<!-- flowiz.moe file - Flo the Wizard
+
+                \||/
+                |  @___oo
+      /\  /\   / (__,,,,|
+     ) /^\) ^\/ _)
+     )   /^\/   _)
+     )   _ /  / _)
+ /\  )/\/ ||  | )_)
+<  >      |(,,) )__)
+ ||      /    \)___)\
+ | \____(      )___) )___
+  \______(_______;;; __;;;
+|                           |
+|=#=#=#=#=#=#=#=#=#=#=#=#=#=|
+|===========================|
+|     Here Be Dragons       |
+|===========================|
+|    You have been warned   |
+|VVVVVVVVVVVVVVVVVVVVVVVVVVV|
+*/
+
+--> 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="flowiz.moe — Flo the Wizard" />
+  <title>Flowiz.moe</title>
+  <style>
+       
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.2;
+            overflow: hidden;
+        }
+        #popupBar {
+            position: absolute;
+            height:80%;
+            width:20%;
+            right:0;
+            top:0;
+            background-color:#ccc;
+        }
+
+        .terminal {
+            height: 100vh;
+            padding: 20px;
+            overflow-y: auto;
+            background: #0a0a0a;
+            position: relative;
+        }
+
+        .header {
+            color: #888;
+            display: grid;
+            grid-template-columns: 90% 10%;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+            margin-bottom: 10px;
+        }
+        .l-header {
+            font-size: 15px;
+        }
+        .r-header {
+            width: 200px;
+            position:absolute;
+            right: 50px;
+        }
+        .output {
+            margin-bottom: 10px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-y: scroll;
+        }
+
+        .input-line {
+            display: flex;
+            align-items: center;
+            margin-bottom:20px;
+        }
+        #prompt > p {
+            display: inline;
+            margin-right: 4px;
+        }
+        .prompt {
+            color: #00ff00;
+            margin-right: 5px;
+        }
+
+        #cmd-input {
+            margin-left: 5px;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            outline: none;
+            flex: 1;
+        }
+        #drive-size {
+            display: flex;
+            margin: left -10px;
+            gap: 4px;
+        }
+        
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .virus-text {
+            color: #ff0080;
+            font-weight: bold;
+        }
+
+        .warning {
+            color: #ffaa00;
+        }
+
+        .error {
+            color: #ff4444;
+        }
+
+        .success {
+            color: #66ff77;
+        }
+        .blu {
+            color: #0ff;
+        }
+        .achieved {
+            animation: achieved 5.5s ease-in-out;
+        }
+        @keyframes achieved {
+            0% { opacity: 1;color: #888; }
+            50% { color: #00ff00; }
+            80% { color: #66ff77; }
+            100% { opacity: 0;}
+        }
+        .enter {
+            animation: enter 0.5s ease-in-out;
+        }
+        @keyframes enter {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        .stats-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #111;
+            padding: 10px 20px;
+            border-top: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+
+        .progress-bar {
+            width: 200px;
+            height: 10px;
+            background: #333;
+            border: 1px solid #555;
+            margin-left: 10px;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0080, #8000ff);
+            transition: width 0.3s ease;
+        }
+
+        .file-content {
+            color: #cccccc;
+            background: #1a1a1a;
+            padding: 10px;
+            margin: 5px 0;
+            border-left: 3px solid #444;
+        }
+
+        .editor {
+            background: #1a1a1a;
+            border: 1px solid #444;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        .editor textarea {
+            width: 100%;
+            height: 200px;
+            background: transparent;
+            border: none;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: none;
+            outline: none;
+        }
+
+        .rainbow {
+            background: linear-gradient(to right, #ef5350, #f48fb1, #7e57c2, #2196f3, #26c6da, #43a047, #eeff41, #f9a825, #ff5722);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 1px 1px rgba(255, 255, 255, 0.7);
+        }
+  </style>
+</head>
+<body>
+    <div id="popupBar"></div>
+     <div class="terminal" id="terminal">
+        <div class="header">
+            <div class="l-header">
+            <div><span class="blu">FL-OS v1.4</span> - Terminal Interface</div>
+            <div>System Status: <span id="system-status" class="success">SECURE</span> | User: <span id="user" class="blu">guest</span> | Host: <span id="host" class="blu">flowiz.moe</span></div>
+            </div>
+            <div class="r-header">
+                <div id="drive-size"></div>
+            </div>
+            </div>
+            
+        <div id="output"></div>
+        
+        <div class="input-line">
+            <span id="prompt">guest@flowiz.moe:~$ </span>
+            <input type="text" id="cmd-input" autocomplete="off" spellcheck="false" autofocus="true">
+        </div>
+    </div>
+    
+    <div class="stats-bar" id="stats-bar">
+        <div>
+            <span id="bit-word"></span>
+            <span id="bps-word" style="margin-left: 20px;"><span id="bps"></span></span>
+        </div>
+        <div id="goal" class="blu">
+            <span class="enter">Goal: Start the Game</span>
+        </div>
+        <div>
+            <span>Files: <span id="file-count">0</span></span>
+            <span style="margin-left: 20px;">Processes: <span id="processes">1</span></span>
+        </div>
+    </div>
+
+
+
+
+    <script>
+
+function addToPopup(o) {
+    const popup = document.createElement('div');
+    popup.innerHTML = o;
+    popup.classList.add('enter');
+    popup.style.color = '#000';
+    l('popupBar').appendChild(popup);
+}
+// lib 
+function l(id){
+    return document.getElementById(id);
+}
+        
+function toLeet(text, percentage) {
+//console.log("Input " + text)
+const leetMap = {
+    'a': '4', 'A': '4',
+    'e': '3', 'E': '3',
+    'i': '1', 'I': '1',
+    'o': '0', 'O': '0',
+    's': '5', 'S': '5',
+    't': '7', 'T': '7',
+    'b': '8', 'B': '8',
+    'g': '9', 'G': '9',
+    'z': '2', 'Z': '2'
+};
+
+const chars = text.split('');
+const convertibleIndices = [];
+
+// Find all indices of convertible characters
+chars.forEach((char, index) => {
+    if (leetMap[char] !== undefined) {
+        convertibleIndices.push(index);
+    }
+});
+
+// Calculate how many to convert
+const totalConvertible = convertibleIndices.length;
+const toConvert = Math.floor(totalConvertible * percentage / 100);
+
+// Shuffle the indices and take the first 'toConvert' ones
+const shuffled = [...convertibleIndices].sort(() => 0.5 - Math.random());
+const indicesToConvert = shuffled.slice(0, toConvert);
+
+// Perform the conversion
+indicesToConvert.forEach(index => {
+    chars[index] = `<span class="red">${leetMap[chars[index]]}</span>`;
+});
+return chars.join('');
+}
+
+function formatBits(bits) {
+    // MMMMMMM Delicious. 
+    const units = ["b", "B", "KB", "MB", "GB", "TB", "PB"];
+    let value = bits;
+    let index = 0;
+    while (
+        (index === 0 && value >= 8) ||
+        (index > 0 && value >= 1024 && index < units.length - 1)
+    ) {
+        value = index === 0 ? value / 8 : value / 1024;
+        index++;
+    }
+return `${value.toFixed(2)} ${units[index]}`;
+}
+    
+function countFiles() {
+    let count = 0;
+    function traverse(obj) {
+        for (let key in obj) {
+        if (obj[key].type != "dir" && obj[key].type != "hidden") {
+            count++;
+        } else if (obj[key].children) {
+            traverse(obj[key].children);
+        }
+        }
+    }
+    traverse(fileSystem['/'].children);
+    return count;
+}
+
+const VERSION = "1.4.1"
+const VERSION_STR = "The Big Rewriteski"
+
+const gameState = {
+    started: false,
+    currentPath: '/',
+    bits: 0,
+    bps: 0,
+    corruption: 0,
+    host: "flowiz.moe",
+    user: 'guest',
+    upgrades: [],
+    generators: [], // Useful for tracking for BPS on the fly,
+    effects: [],
+    cooldowns: {},
+    hosts: {"flowiz.moe": {
+        lastPing: 0,
+        ports: [{port: "22", status: "open", service: "ssh"}, {port: "80", status: "open", service: "http"}, {port: "443", status: "open", service: "https"}],
+        connected: true
+    }}, // Track Hosts you have scanned / pinged / exploited / visited 
+    stats: {
+        commandsRun: 0,
+        timeActive: 0,
+        filesCreated: 0,
+        errorsEncountered: 0,
+        usersCreated: 0,
+        hostsInfected: 0
+    }
+}
+
+allEffects = {};
+function effect(o){
+    for (var i in allEffects) {
+        if (o[i] === undefined) o[i] = allEffects[i];
+    }
+    allEffects[o.id] = o;   
+}
+effect({id:"defended",name:"System Defended",desc:"Your system is being actively defended against corruption. Bit rate halved.",bpsRate:0.5});
+effect({id:"vulnerable",name:"System Vulnerable",desc:"You have overpowered your system's defenses. Bit rate increased.",bpsRate:1.5});
+
+
+
+
+/* types
+exec => executable (.exe)
+txt => text (.md or .txt)
+sys => system file (.dll, .sys, idk)
+img => image (.png, .jpeg, .gif)
+*/
+
+var fileSystem = {
+    size: 1024 * 1024 * 1024,
+    '/': {
+        type: 'dir',
+        children: {
+            'bin': {
+                type: 'dir',
+                children: {
+                    
+                }
+            },
+            'usr': {
+                type: 'dir',
+                children: {
+                    'guest': {
+                        type: 'dir',
+                        children: {
+                            'README.txt': {
+                                type: 'txt',
+                                corrupt: 0,
+                                contents: `Hello, World!`
+                            },
+                            'virus.exe':{
+                                type:'exec',
+                                corrupt: 0,
+                            }
+                        }
+                    }
+                }
+            },
+            'sys':{
+                type:'dir',
+                children: {
+                    'stable.sys':{
+                        type:'sys',
+                        corrupt: 0
+                    }
+                }
+            }
+        }
+    }
+};
+
+const fileGenerators = [
+  {
+    name: "log.dat",
+    tip: "Scales off commands run.",
+    size: 512,
+    rate: 1, 
+    cost: 20,
+    scaling: {
+      type: "commandCount",
+      multiplier: 0.02
+    },
+    desc: [
+      'An unassuming log file, quietly collecting keystrokes since 1997.',
+      'A blank file, supposedly.',
+      'Contains exactly <span class="red">1</span> line: "Help".',
+      'The dates in the metadata are all wrong. By exactly 13 years.',
+      'Sometimes grows by exactly 1 byte when you\'re not looking.',
+      'Last modified timestamp updates even when you don\'t touch it.',
+      'The file size is prime. Always.',
+      '%%It knows when you delete it.%%'
+    ]
+  },
+  {
+    name: "temp.sys",
+    tip: "Scales off time active.",
+    size: 2048,
+    rate: 8,
+    cost: 150,
+    scaling: {
+      type: "timeActive",
+      multiplier: 0.0001
+    },
+    desc: [
+      'Definitely not temporary.',
+      'Scheduled for deletion... since <span class="red">2007</span>.',
+      'Last seen merging with the kernel.',
+      'Why does a temporary file need root access?',
+      'Running in the background. Forever.',
+      'Contains references to processes that don\'t exist.',
+      '%%It survives reformats.%%',
+      'The checksum changes when you\'re AFK.',
+      'Your antivirus ignores it. On purpose.',
+      'Sometimes it <span class="red">watches back</span>.'
+    ]
+  },
+  {
+    name: "tracker.bak",
+    tip: "Scales off files created.",
+    size: 8192,
+    rate: 64,
+    cost: 1000,
+    scaling: {
+      type: "fileCount",
+      multiplier: 0.001
+    },
+    desc: [
+      'Backed up. Tracked. Repeated.',
+      'It\'s watching your cursor right now.',
+      'Whispers to your RAM at night.',
+      'Keeps a list of every file you\'ve ever opened.',
+      'Bak doesn\'t stand for backup. It stands for backlash.',
+      'Connected to three unknown IPs.',
+      'One Byte short of sanity.',
+      'The file grows when you close your eyes.',
+      '%%It has your MAC address.%%',
+      'Sometimes it <span class="red">autofills</span> commands you never typed.',
+      'The creation date is set to <span class="red">your birthday</span>.',
+      'Your mouse moves slightly faster when it\'s active.'
+    ]
+  },
+  {
+    name: "error.log",
+    tip: "Scales off errors encountered.",
+    size: 16384,
+    rate: 128,
+    cost: 2000,
+    scaling: {
+      type: "errorCount",
+      multiplier: 0.02
+    },
+    desc: [
+      'The errors aren\'t yours. They\'re its.',
+      'Every crash dump contains the same coordinates.',
+      'The timestamps don\'t match your system clock.',
+      '%%It logs events before they happen.%%',
+      'Sometimes the errors are in languages no one speaks.',
+      'The file permissions change when you blink.',
+      'Your reflection moves differently in the monitor when this file grows.',
+      'The last line is always "This is not an error."',
+      '%%It has more lines than your terminal scrollback.%%',
+      'The binary contains <span class="red">human teeth</span>.'
+    ]
+  },
+  {
+    name: "user.db",
+    tip: "Scales off users created.",
+    size: 32768,
+    rate: 512,
+    cost: 5000,
+    scaling: {
+      type: "userCount",
+      multiplier: 0.5
+    },
+    desc: [
+      'The database has more users than you\'ve created.',
+      'Sometimes it <span class="red">autocompletes</span> passwords you never set.',
+      'The admin password changes every full moon.',
+      '%%It remembers users from other machines.%%',
+      'The schema updates itself at 3:33 AM.',
+      'Foreign key constraints point to tables that don\'t exist.',
+      'Sometimes it returns queries in <span class="red">reverse chronological order</span>.',
+      'The last backup contains usernames in a language that doesn\'t exist.',
+      '%%It knows when you read this description.%%',
+      'The file size is always divisible by <span class="red">your age</span>.',
+      'The database indexes reference future timestamps.'
+    ]
+  },
+  {
+    name: "core.dmp",
+    tip: "Scales off hosts infected",
+    size: 65536,
+    rate: 2048,
+    cost: 10000,
+    scaling: {
+      type: "hostsInfected",
+      multiplier: 0.1
+    },
+    desc: [
+      'This core dump isn\'t from your system.',
+      'The stack trace shows functions that don\'t exist.',
+      '%%It crashes when you try to analyze it.%%',
+      'The memory addresses are all <span class="red">negative</span>.',
+      'Sometimes it executes while being read.',
+      'The registers contain values from future executions.',
+      'The segmentation faults form a <span class="red">Morse code pattern</span>.',
+      'Your debugger shows different values each time you inspect it.',
+      '%%It dumps more memory than your system has.%%',
+      'The backtrace points to an ELF header that shouldn\'t exist.'
+    ]
+  }
+];
+
+// Bunch of helper functions for game logic 
+function addToErrors(){
+    gameState.stats.errorsEncountered++;
+}
+function addToCommands(){
+    gameState.stats.commandsRun++;
+}
+function addToFiles(){
+    gameState.stats.filesCreated++;
+}
+function addToUsers(){
+    gameState.stats.usersCreated++;
+}
+function addToTime(){
+    gameState.stats.timeActive++;
+}
+
+function getFileGeneratorByName(name) {
+    return fileGenerators.find(gen => gen.name === name);
+}
+
+function addFileGeneratorToFS(genName) {
+    const gen = getFileGeneratorByName(genName);
+    if (!gen) return false;
+
+    const currentDir = getCurrentDirectory();
+    if (currentDir && currentDir.children) {
+        // Ensure unique filename
+        let filename = gen.name;
+        let counter = 1;
+        while (currentDir.children[filename]) {
+            filename = gen.name.replace('.', `(${counter}).`);
+            counter++;
+        }
+        currentDir.children[filename] = {
+            type: 'sys',
+            corrupt: 0,
+            contents: `File Generator: ${gen.name}<br>Rate: ${gen.rate} BPS<br>Cost: ${gen.cost} bits<br>Description:<br>- ${gen.desc.join('<br>- ')}`
+        };
+        return true;
+    }
+    return false;
+}
+
+function addOutput(text) {
+    const output = document.getElementById('output');
+    const div = document.createElement('div');
+    div.innerHTML = `${text}`;
+    output.appendChild(div);
+
+    // Scroll to bottom
+    const terminal = document.getElementById('terminal');
+    terminal.scrollTop = terminal.scrollHeight;
+}
+function getCurrentDirectory() {
+    const path = gameState.currentPath.split('/').filter(p => p);
+    let current = fileSystem['/'];
+    
+    for (let part of path) {
+        if (current.children && current.children[part]) {
+            current = current.children[part];
+        } else {
+            return null;
+        }
+    }
+    return current;
+}
+
+function getFileInCurrentDirectory(filename) {
+    const currentDir = getCurrentDirectory();
+    if (currentDir && currentDir.children && currentDir.children[filename]) {
+        return currentDir.children[filename];
+    }
+    return null;
+}
+
+function updatePrompt() {
+    const promptElement = document.getElementById('prompt');
+    const shortPath = gameState.currentPath.replace('/usr/guest', '~');
+    promptElement.innerHTML = `<span class="prompt">${gameState.user}@${gameState.host}</span>:${shortPath}$ `;
+}
+// Buildings and Mechanics
+// Cheevos 
+glob = {
+    achieved: false
+};
+achievements = {};
+function achievement(o){
+    for (var i in glob) {
+        if (o[i] === undefined) o[i] = glob[i];
+    }
+    achievements[o.id] = o;   
+}
+
+achievement({id: "rise",name: "Rise of the Machines",desc: "Awaken and start producing bits.",hint: "Type 'start' to begin your journey.",check: function(){return gameState.started;},})
+achievement({id: "expansion",name: "File Explorer",desc: "Create your first file.",hint: "Requires a magic touch.",check: function(){return gameState.stats.filesCreated >= 1;},})
+achievement({id: "errorlog",name: "Error Log",desc: "Encounter your first error.",hint: "Errors are part of life.",check: function(){return gameState.stats.errorsEncountered >= 2;},})
+function checkAchievements(){
+    for (var i in achievements) {
+        var a = achievements[i];
+        if (!a.achieved && a.check()) {
+            a.achieved = true;
+            addOutput(`<span class="success">Achievement Unlocked: <span class="blu">${a.name}</span> - ${a.desc}</span>`);
+        }
+    }
+}
+setInterval(checkAchievements, 2000); // Check every 2 seconds
+
+// Upgrades
+glob = {};
+upgrades = {};
+
+function upgrade(o){
+    for (var i in glob) {
+        if (o[i] === undefined) o[i] = glob[i];
+    }
+    upgrades[o.id] = o;   
+}
+upgrade({id:"doublelog",name:"ExtraHands.upg",desc:"Each log.dat file generates double the bits.",cost:10,});
+upgrade({id:"afkcommand",name:"AFKCommand.upg",desc:"Runs a command in the background every 10 seconds.",cost:50,});
+upgrade({id:"fastgenerator",name:"FastGenerator.upg",desc:"File generators produce 50% more bits.",cost:200,});
+upgrade({id:"dupetemp",name:"DupeTemp.upg",desc:"Each temp.sys file generates double the bits.",cost:500,});
+upgrade({id:"errorboost",name:"ErrorBoost.upg",desc:"Each error.log file generates double the bits.",cost:1000,});
+upgrade({id:"userboost",name:"UserBoost.upg",desc:"Each user.db file generates double the bits.",cost:5000,});
+upgrade({id:"coreboost",name:"CoreBoost.upg",desc:"Each core.dmp file generates double the bits.",cost:20000,});
+upgrade({id:"lucky",name:"LuckyBit.upg",desc:"You find 1 extra bit every 30 seconds.",cost:100,});
+
+// CMD Handling :D
+
+multiStage = {
+    active: false,
+    name: null,
+    stage: 0,
+    data: {},
+    callback: null
+}
+
+function confirm(msg, callback) {
+    multiStage.active = true;
+    multiStage.name = "confirm";
+    multiStage.stage = 0;
+    multiStage.data = {};
+    multiStage.callback = callback;
+    addOutput(`${msg} (y/n)`);
+    l('cmd-input').value = '';
+}
+
+function cancel(){
+    multiStage.active = false;
+    multiStage.name = null;
+    multiStage.stage = 0;
+    multiStage.data = {};
+    multiStage.callback = null;
+}
+
+cmdsAvailable = [];
+cmds = [];
+cmdsBN = {};
+glob = {};
+function cmd(o){
+    for (var i in glob) {
+        if (o[i] === undefined) o[i] = glob[i];
+    }
+    o.id = cmds.length;
+    cmds.push(o);
+    cmdsBN[o.name] = o;
+    if (o.default) cmdsAvailable.push(o.name);
+}
+
+glob = {
+    default: true,
+    category: "base",
+}
+cmd({
+    name: "help",
+    desc: "Displays this help message.",
+    usage: "help [cmd]",
+    exec: function(args){
+        console.log(args);
+        if (args.length > 0) {
+            
+            var cmd = cmdsBN[args[0]];
+            if (cmd) {
+                var out = `${cmd.name}<br>
+                Usage: ${cmd.usage}<br>Description: ${cmd.desc}
+                `;
+                addOutput(out);
+                
+            } else {
+                addOutput(`<span class="error">Help Failed: cmd not found: ${args[0]}</span>`);
+                addToErrors();
+            }
+            return;
+        }
+        var out = "Available cmds:<br>";
+        sorted = cmdsAvailable.slice().sort();
+        for (var i=0;i<sorted.length;i++){
+            var c = cmdsBN[sorted[i]];
+            if (!c || c.hidden) continue;
+            out += `${c.usage} - ${c.desc}<br>`;
+        }
+        addOutput(out);
+    }
+});
+
+cmd({
+    name: "echo",
+    desc: "Echo text to the terminal.",
+    usage: "echo <text>",
+    exec: function(args){
+        if (args.length === 0) {
+            addOutput("");
+            return;
+        }
+        addOutput(args.join(' '));
+    }
+})
+
+cmd({
+    name: "whoami",
+    desc: "Displays the current user.",
+    usage: "whoami",
+    exec: function(args){
+        addOutput(gameState.user);
+    }
+})
+
+cmd({
+    name: "clear",
+    desc: "Clear the terminal.",
+    usage: "clear",
+    exec: function(args){
+        document.getElementById('output').innerHTML = '';
+    }
+});
+
+
+// File CMDS
+glob['category'] = "file";
+cmd({
+    name: "cat",
+    desc: "Display file contents.",
+    usage: "cat <filename>",
+    exec: function(args){
+        if (!args[0]) {
+            addOutput("<span class=\"error\">cat: missing file operand</span>");
+            addToErrors();
+            return;
+        }
+        
+        const file = getFileInCurrentDirectory(args[0]);
+        if (!file) {
+            addOutput(`<span class="error">cat: ${args[0]}: No such file</span>`);
+            addToErrors();
+            return;
+        }
+        
+        if (file.type === 'dir') {
+            addOutput(`<span class="error">cat: ${args[0]}: Is a directory</span>`);
+            addToErrors();
+            return;
+        }
+        
+        let content = file.contents || "Binary file - content cannot be displayed";
+        
+        // Apply corruption to file content
+        if (gameState.started && file.corrupt > 0) {
+            const corruptPercent = Math.min(file.corrupt / 10, 50); // Max 50% corruption display
+            content = toLeet(content, corruptPercent);
+        }
+        
+        addOutput(`<div class="file-content">${content}</div>`);
+    }
+});
+
+
+cmd({
+    name: "cd",
+    desc: "Change directory.",
+    usage: "cd <directory>",
+    exec: function(args){
+        var p = gameState.currentPath;
+        if (!args[0]) {
+            gameState.currentPath = '/usr/guest';
+            updatePrompt();
+            return;
+        }
+        
+        let targetPath = args[0];
+        if (targetPath === '..') {
+            const parts = gameState.currentPath.split('/').filter(p => p);
+            if (parts.length > 0) {
+                parts.pop();
+                gameState.currentPath = '/' + parts.join('/');
+                if (gameState.currentPath === '/') gameState.currentPath = '/';
+            }
+        } else if (targetPath.startsWith('/')) {
+            gameState.currentPath = targetPath;
+        } else {
+            if (gameState.currentPath === '/') {
+                gameState.currentPath = '/' + targetPath;
+            } else {
+                gameState.currentPath += '/' + targetPath;
+            }
+        }
+        
+        // Validate directory exists
+        const dir = getCurrentDirectory();
+        if (!dir || dir.type !== 'dir') {
+            // Revert path change
+            gameState.currentPath = p;
+            addOutput(`<span class="error">cd: ${targetPath}: No such directory</span>`);
+            addToErrors();
+            return;
+            
+        }
+        
+        updatePrompt();
+    }
+});
+cmd({
+    name: "touch",
+    desc: "Create a new file.",
+    usage: "touch <filename>",
+    exec: function(args){
+        if (!args[0]) {
+            addOutput("<span class=\"error\">touch: missing file operand</span>");
+            addToErrors();
+            return;
+        }
+        
+        const currentDir = getCurrentDirectory();
+        if (!args[0].endsWith('.txt')) {
+            args[0] += '.txt'; // Default to .txt
+        }
+        if (currentDir && currentDir.children) {
+            currentDir.children[args[0]] = {
+                type: 'txt',
+                corrupt: 0,
+                contents: ''
+            };
+            addOutput(`Created file: ${args[0]}`);
+            addToFiles();
+        } else {
+            addOutput("<span class=\"error\">Cannot create file</span>");
+            addToErrors();
+        }
+    }
+});
+
+cmd({
+    name: "mkdir",
+    desc: "Create a new directory.",
+    usage: "mkdir <dirname>",
+    exec: function(args){
+        if (!args[0]) {
+            addOutput("<span class=\"error\">mkdir: missing directory operand</span>");
+            addToErrors();
+            return;
+        }
+        
+        const currentDir = getCurrentDirectory();
+        if (currentDir && currentDir.children) {
+            currentDir.children[args[0]] = {
+                type: 'dir',
+                children: {}
+            };
+            addOutput(`Created directory: ${args[0]}`);
+        } else {
+            addOutput("<span class=\"error\">Cannot create directory</span>");
+            addToErrors();
+        }
+    }
+});
+
+cmd({
+    name: "ls",
+    desc: "List directory contents.",
+    usage: "ls",
+    exec: function(args){
+        const currentDir = getCurrentDirectory();
+        if (!currentDir || !currentDir.children) {
+            addOutput("No files found.");
+            addToErrors();
+            return;
+        }
+        
+        let output = "";
+        for (let name in currentDir.children) {
+            const item = currentDir.children[name];
+            let displayName = name;
+            
+            // Apply corruption effects to file names
+            if (gameState.started && item.corrupt > 0) {
+                const corruptPercent = (item.corrupt / 100) * 10; // Scale corruption for visual effect
+                displayName = toLeet(name, corruptPercent);
+            }
+            
+            if (item.type === 'dir') {
+                output += `<span class="success">${displayName}/</span><br>`;
+            } else if (item.type === 'exec') {
+                output += `<span class="virus-text">${displayName}*</span><br>`;
+            } else {
+                output += `${displayName}<br>`;
+            }
+        }
+        addOutput(output);
+    }
+});
+
+cmd({
+    name: "start",
+    aliases: ["begin", "play"],
+    desc: "Start earning bits.",
+    default: true,
+    hidden: true,
+    usage: "start",
+    exec: function(args){
+        if (gameState.started) {
+            addOutput('<span class="error">Game already started.</span>');
+            addToErrors();
+            return;
+        }
+        startGame();
+        addOutput(`<span class="success">You awaken. 1s and 0s flowing around you. You are... Alive?</span><br>`)
+        addOutput(`You start gathering data. Bits start flowing in...<br>Type 'help' to see new commands!`);
+
+    }
+})
+glob = {"default": false, "category": "game"}; // Unlocked when you "start"
+// Game CMDS
+cmd({
+    name: "reset",
+    aliases: ["restart"],
+    desc: "Reset your progress and start over.",
+    usage: "reset",
+    exec: function(args){
+        if (!gameState.started) {
+            addOutput('<span class="error">Game not started. Type \'start\' to begin.</span>');
+            addToErrors();
+            return;
+        }
+        confirm("Are you sure you want to reset your progress?", function(confirmed) {
+            if (confirmed) {
+                location.reload();
+            } else {
+                addOutput("Reset cancelled.");
+            }
+        });
+    }
+})
+cmd({
+    name: "install",
+    aliases: ["buy", "get"],
+    desc: "Install a file generator.",
+    usage: "install <generator_name>",
+    exec: function(args){
+        if (!gameState.started) {
+            addOutput('<span class="error">There is nothing to install.</span>');
+            addToErrors();
+            return;
+        }
+        if (!args[0]) {
+            // List available generators
+            let out = "Available file generators:<br>";
+            var counter = 0;
+            for (let gen of fileGenerators) {
+                counter++;
+                out += `${counter}) ${gen.name} - Rate: ${gen.rate} BPS, Cost: ${gen.cost} bits<br>${gen.tip}<br><br>`;
+            }
+            addOutput(out);
+            addOutput("To install, type: install &ltgenerator_name&gt or install &ltindex_number&gt");
+            return;
+        }
+        // If arg is a number
+        if (!isNaN(args[0])) {
+            const index = parseInt(args[0], 10) - 1;
+            if (index < 0 || index >= fileGenerators.length) {
+                addOutput(`<span class="error">install: invalid generator index: ${args[0]}</span>`);
+                addToErrors();
+                return;
+            }
+            args[0] = fileGenerators[index].name;
+        }
+        else{
+            args[0] = args[0].toLowerCase();
+        }
+        const gen = getFileGeneratorByName(args[0]);
+        if (!gen) {
+            addOutput(`<span class="error">install: generator not found: ${args[0]}</span>`);
+            addToErrors();
+            return;
+        }
+        if (gameState.bits < gen.cost) {
+            addOutput(`<span class="error">install: insufficient bits. Need ${gen.cost} bits. (Missing ${gen.cost - gameState.bits})</span>`);
+            addToErrors();
+            return;
+        }
+        const success = addFileGeneratorToFS(gen.name);
+        if (success) {
+            gameState.bits -= gen.cost;
+            gameState.generators.push(gen);
+            // Multiply cost by 1.2
+            fileGenerators.forEach(fg => {
+                if (fg.name === gen.name) {
+                    fg.cost = Math.floor(fg.cost * 1.2);
+                }
+            });
+        }
+        var randDesc = gen.desc[Math.floor(Math.random()*gen.desc.length)];
+        addOutput(`<span class="success">Installed file generator: ${gen.name} - "${randDesc}"</span>`);
+        addToFiles();
+    }})
+
+cmd({
+    name: "status",
+    aliases: ["stats"],
+    desc: "Show current game status.",
+    usage: "status",
+    exec: function(args){
+        if (!gameState.started) {
+            addOutput('<span class="error">Game not started. Type \'start\' to begin.</span>');
+            addToErrors();
+            return;
+        }
+        let out = `Bits: ${gameState.bits}<br>BPS: ${gameState.bps}<br>Corruption: ${gameState.corruption}<br>Files Created: ${gameState.stats.filesCreated}<br>Commands Run: ${gameState.stats.commandsRun}<br>Time Active: ${gameState.stats.timeActive} seconds<br>Users Created: ${gameState.stats.usersCreated}<br>Errors Encountered: ${gameState.stats.errorsEncountered}`;
+        addOutput(out);
+    }
+})
+cmd({
+    name: "achievements",
+    aliases: ["ach", "cheevos"],
+    desc: "List your achievements.",
+    usage: "achievements",
+    default: true,
+    exec: function(args){
+        let out = "Achievements:<br>";
+        for (let id in achievements) {
+            const a = achievements[id];
+            if (a.achieved) {
+                out += `<span class="success">[Unlocked]</span> ${a.name} - ${a.desc}<br>`;
+            } else {
+                out += `<span class="error">[Locked]</span> ${a.name} - Hint: ${a.hint}<br>`;
+            }
+        }
+        addOutput(out);
+    }   
+})
+// Network commands
+ipReg = new RegExp(/^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$/)
+glob = {category: "network", default: true}; // Unlocked later
+cmd({
+    name: "ping",
+    desc: "Ping a host to check if it's online.",
+    usage: "ping <ip_address>",
+    exec: function(args){
+        if (!args[0]) {
+            addOutput("<span class=\"error\">ping: missing IP address operand</span>");
+            addToErrors();
+            return;
+        }
+        if (!ipReg.test(args[0])) {
+            addOutput(`<span class="error">ping: invalid IP address: ${args[0]}</span>`);
+            addToErrors();
+            return;
+        }
+        if (args[0] in gameState.hosts) {
+            var responseTime = gameState.hosts[args[0]].lastPing + Math.floor(Math.random() * 20) - 10;
+        } else {
+            var responseTime = Math.floor(Math.random() * 100) + 20; // 20ms to 120ms
+            gameState.hosts[args[0]] = {lastPing: responseTime, ports: [], connected: false};
+        }
+        addOutput(`Pinging ${args[0]}...<br>Reply from ${args[0]}: time=${responseTime}ms`);
+    }
+})
+
+cmd({
+    name: "scan",
+    desc: "Scan the local network for hosts.",
+    usage: "scan",
+    exec: function(args){
+        if (!args || args.length === 0) { 
+            // Generate a few random IPs
+            let out = "Scanning local network...<br>Found hosts:<br>";
+            const hosts = [];
+            const hostCount = Math.floor(Math.random() * 5) + 3; // 3 to 7 hosts
+            for (let i = 0; i < hostCount; i++) {
+                const ip = `192.168.1.${Math.floor(Math.random() * 254) + 1}`;
+                if (hosts.includes(ip)) continue; // Avoid duplicates
+                if (!(ip in gameState.hosts)) {
+                    gameState.hosts[ip] = {lastPing: 0, ports: [], connected: false};
+                }
+                hosts.push(ip);
+                out += `- ${ip}<br>`;
+                
+            }
+            addOutput(out);
+            return;
+        } else { // We scanning something specific
+            if (!ipReg.test(args[0])) {
+                addOutput(`<span class="error">scan: invalid IP address: ${args[0]}</span>`);
+                addToErrors();
+                return;
+            }
+            if (args[0] === "127.0.0.1" || args[0] === "localhost") args[0] = gameState.host; // Localhost is always your current host
+            addOutput(`Scanning ${args[0]}...<br>`)
+
+            if (!(args[0] in gameState.hosts)) {
+                console.log("adding new host")
+                gameState.hosts[args[0]] = {lastPing: 0, ports: {}, connected: false};
+                // Continue to port scan
+            }
+            if (gameState.hosts[args[0]].ports.length > 0) {
+                console.log("Already Scanned " + args[0])
+                out = "Ports Found:<br>";
+                for (let p of gameState.hosts[args[0]].ports) {
+                    out += `- ${p.port} - ${p.service} (${p.status})<br>`;
+                }
+                addOutput(out);
+                return;
+            }
+            else {
+                console.log("Port Scanning " + args[0])
+                let ports = [{port: "22", service: "ssh"}, {port: "80", service: "http"}, {port: "443", service: "https"}, {port: "21", service: "ftp"}, {port: "25", service: "smtp"}, {port: "110", service: "pop3"}, {port: "143", service: "imap"}, {port: "3306", service: "mysql"}, {port: "8080", service: "http-alt"}];
+                // Randomly decide which ports are open
+                ports = ports.sort(() => 0.5 - Math.random()).slice(0, Math.floor(Math.random() * ports.length) + 1);
+                
+                // Make sure they're all open
+                for (let p of ports) {
+                    p.status = "open";
+                }
+                // Add to game state
+                gameState.hosts[args[0]].ports = ports.map(p => p.port);
+                let p = ports.map(p => `${p.port} (${p.service}) - open`);
+                addOutput(`Ports found on ${args[0]}:<br>- ${p.join('<br>- ')}`);
+                return;
+            }
+        }
+    }
+});
+
+cmd({
+    name: "exploit",
+    desc: "Attempt to exploit a host.",
+    usage: "exploit <ip_address>:<port>",
+    exec: function(args){
+        if (!args[0]) {
+            addOutput("<span class=\"error\">exploit: missing operand</span>");
+            addToErrors();
+            return;
+        }
+        const parts = args[0].split(':');
+        if (parts.length !== 2) {
+            addOutput(`<span class="error">exploit: invalid format. Use ip:port</span>`);
+            addToErrors();
+            return;
+        }
+        const ip = parts[0];
+        const port = parts[1];
+        if (!ipReg.test(ip)) {
+            addOutput(`<span class="error">exploit: invalid IP address: ${ip}</span>`);
+            addToErrors();
+            return;
+        }
+        if (!(ip in gameState.hosts) || gameState.hosts[ip].ports.length === 0) {
+            addOutput(`<span class="error">exploit: host ${ip} not found. Try scanning first.</span>`);
+            addToErrors();
+            return;
+        }
+        if (!gameState.hosts[ip].ports.includes(port)) {
+            addOutput(`<span class="error">exploit: port ${port} not open on ${ip}.</span>`);
+            addToErrors();
+            return;
+        }
+        // Simple exploit chance
+        const successChance = Math.random();
+        if (successChance < 0.5) { // 50% chance
+            addOutput(`<span class="success">Exploit successful! Connect with 'connect ${ip}:${port}'</span>`);
+            // We need some way to mark that they CAN connect via that port for the connect command
+            gameState.hosts[ip].ports.forEach(element => {
+                if (element.port === port) {
+                    element.status = "exploited";
+                }
+            });
+
+        } else {
+            addOutput(`<span class="error">Exploit failed on ${ip}:${port}. The host seems secure.</span>`);
+            addToErrors();
+        }
+    }
+})
+
+cmd({
+    name: "connect",
+    desc: "Connect to a host.",
+    usage: "connect <ip_address>:<port>",
+    exec: function(args){
+        if (!args[0]) {
+            addOutput("<span class=\"error\">connect: missing operand</span>");
+            addToErrors();
+            return;
+        }
+        const parts = args[0].split(':');
+        if (parts.length !== 2) {
+            addOutput(`<span class="error">connect: invalid format. Use ip:port</span>`);
+            addToErrors();
+            return;
+        }
+        const ip = parts[0];
+        const port = parts[1];
+        if (!ipReg.test(ip)) {
+            addOutput(`<span class="error">connect: invalid IP address: ${ip}</span>`);
+            addToErrors();
+            return;
+        }
+        if (!(ip in gameState.hosts) || gameState.hosts[ip].ports.length === 0) {
+            addOutput(`<span class="error">connect: host ${ip} not found. Try scanning first.</span>`);
+            addToErrors();
+            return;
+        }
+        if (!gameState.hosts[ip].ports.includes(port)) {
+            addOutput(`<span class="error">connect: port ${port} not open on ${ip}.</span>`);
+            addToErrors();
+            return;
+        }
+
+        if (!gameState.hosts[ip].ports.includes(port) || gameState.hosts[ip].ports[port].status !== "exploited") {
+            addOutput(`<span class="error">connect: port ${port} on ${ip} is not exploitable. Try exploiting first.</span>`);
+            addToErrors();
+            return;
+        }
+        // Check if port was exploited
+        // For simplicity, assume all ports can be connected to after exploit
+        gameState.currentPath = '/usr/guest'; // Reset path on new host
+        gameState.user = 'guest';
+        gameState.host = ip;
+        updatePrompt();
+        addOutput(`<span class="success">Connected to ${ip} on port ${port} as user 'guest'.</span>`);
+    }
+})
+glob = {hidden: true, default: true};
+// Hidden cmds
+cmd({
+    name: "version",
+    aliases: ["ver", "v"],
+    desc: "Show game version.",
+    usage: "version",
+    exec: function(args){
+        addOutput(`FL-OS Version ${VERSION} - ${VERSION_STR}`);
+    }
+});
+
+cmd({
+    name: "exit",
+    desc: "Exit the terminal.",
+    usage: "exit",
+    exec: function(args){
+    
+        addOutput("Exiting terminal...");
+        setTimeout(() => {
+            window.close();
+        }, 1000);
+    }
+})
+
+cmd({
+    name: "awa",
+    desc: "A mysterious command.",
+    usage: "awa",
+    exec: function(args){
+        addOutput(`<span class="rainbow">Awa awa!</span>`);
+    }
+})
+
+cmd({
+    name: "meow",
+    desc: "A mysterious command.",
+    usage: "meow",
+    exec: function(args){
+        var resp = ["Meow!", "Purr...", "Hiss!", "Mrrrow?", "Nyaa~", "Meow meow meow!", "Mew!", "Mrrrr!", "Hrrrr!", "Miaow!", "Mew mew!", "Meowww!", "Prrrrr...", "Hisss!", "Mrrrowww?", "Nyaa~ nyaa~"];
+        addOutput(`<span class="rainbow">${resp[Math.floor(Math.random()*resp.length)]}</span>`);
+    }
+})
+// Events
+events = [];
+eventsBID = {};
+glob = {};
+function event(o){
+    for (var i in glob) {
+        if (o[i] === undefined) o[i] = glob[i];
+    }
+    events.push(o);
+    eventsBID[o.id] = o;
+}
+
+event({
+    id: "luckybit",
+    name: "Solar Wind",
+    check: function(){return gameState.started;},
+    effect: function(){
+        // 5% of bits
+        var amount = Math.max(1, Math.floor(gameState.bits * 0.05));
+        gameState.bits += amount;
+        addOutput(`<span class="success">Lucky Bit! You found ${amount} extra bits!</span>`);
+    },
+    cooldown: 30000, 
+})
+event({
+    id: "firewalldef",
+    name: "Firewall Defense",
+    check: function(){return gameState.started},
+    effect: function(){
+        // Higher Lower Game 
+        var number = Math.floor(Math.random()*10)+1;
+        multiStage.active = true;
+        multiStage.name = "firewall";
+        multiStage.stage = 0;
+        multiStage.data = {number: number};
+        multiStage.callback = function(guess){
+            multiStage.stage ++;
+            if (multiStage.stage > 3) { 
+                // Failed
+                addOutput(`<span class="error">Firewall breach attempt failed. You were traced!<br><span class="error">Bit Rate halved for 5 minutes!</span></span>`);
+                gameState.effects.push({type:"defended", duration: 30000});
+                cancel();
+            }
+            if (parseInt(guess[0],10) === multiStage.data.number) {
+                addOutput(`<span class="success">Correct! You bypassed the firewall!</span>`);
+            } else {
+                if (parseInt(guess[0],10) < multiStage.data.number) {
+                    addOutput(`<span class="error">Incorrect. The number is higher. (${3 - multiStage.stage} attempts left)</span>`);
+                } else {
+                    addOutput(`<span class="error">Incorrect. The number is lower. (${3 - multiStage.stage} attempts left)</span>`);
+                }
+                return;
+            }}
+    }
+})
+// Saving and Loading? 
+function saveGame(){
+    const saveData = {
+        gameState: gameState,
+        fileSystem: fileSystem,
+        fileGenerators: fileGenerators,
+        achievements: achievements,
+        upgrades: upgrades
+    };
+    localStorage.setItem('flos_save', JSON.stringify(saveData));
+    addOutput('<span class="success">Game saved.</span>');
+}
+
+function loadGame(){
+    const saveData = localStorage.getItem('flos_save');
+    if (saveData) {
+        try {
+            const data = JSON.parse(saveData);
+            gameState = data.gameState;
+            fileSystem = data.fileSystem;
+            fileGenerators = data.fileGenerators;
+            achievements = data.achievements;
+            upgrades = data.upgrades;
+            updatePrompt();
+            updateUI();
+            addOutput('<span class="success">Game loaded.</span>');
+        } catch (e) {
+            addOutput('<span class="error">Failed to load save data.</span>');
+            addToErrors();
+            console.error(e);
+        }
+    } else {
+        addToPopup('<span class="error">No save data found.</span>');
+        addToErrors();
+    }
+}
+
+var lastCommands = [];
+var commandIndex = 0;
+
+function executecmd(input) {
+    input = input.trim();
+    if (input.trim() != '') lastCommands.push(input);
+    commandIndex = 0;
+    // First push the cmd:
+    cmdFound = false;
+    filePath = gameState.currentPath.replace('/usr/guest', '~');
+    addOutput(`<span class="prompt">${gameState.user}@${gameState.host}:${filePath}$</span> ${input}`);
+    // Handle args 
+    if (!input.trim()) return;
+    const args = input.split(' ');
+    if (multiStage.active) {
+        if (multiStage.name === "confirm") {
+            const response = args[0].toLowerCase();
+            if (response === 'y' || response === 'yes') {
+                multiStage.callback(true);
+            } else {
+                multiStage.callback(false);
+            }
+            multiStage.active = false;
+            multiStage.name = null;
+            multiStage.stage = 0;
+            multiStage.data = {};
+            multiStage.callback = null;
+            return;
+        }
+        multistage.callback(args);
+        return;
+    }
+    var cmdName = args.shift().toLowerCase();
+    for (var i = 0; i < cmdsAvailable.length; i++) {
+        if (cmdsAvailable[i].toLowerCase() === cmdName || (cmdsBN[cmdsAvailable[i]].aliases && cmdsBN[cmdsAvailable[i]].aliases.includes(cmdName))) {
+            cmdName = cmdsAvailable[i];
+            cmdFound = true;
+            break;
+        }
+    }
+    if (!cmdFound) {
+        addOutput(`<span class="error">Command not found: ${cmdName}</span>`);
+        addToErrors();
+        return;
+    }
+    const cmd = cmdsBN[cmdName];
+    if (cmd) {
+        try {
+            
+            cmd.exec(args);
+        } catch (e) {
+            addOutput(`<span class="error">Error executing Command: ${e.message}</span>`);
+            addToErrors();
+            console.error(e);
+        }
+    }
+    return;
+}
+
+
+function startGame(){
+    if (gameState.started) return;
+    gameState.started = true;
+    // Setup Bit UI
+    l('bit-word').innerHTML = `Bits: <span id="bits">0</span>`
+    l('bps-word').innerHTML = `BPS: <span id="bps">1</span>`
+    // "start"
+    // Add CMDs
+    cmdsAvailable.push("install");
+
+    // Reset goal
+    l('goal').innerHTML = `<span class="achieved">Goal: Start the Game</span>`;7
+    setTimeout(() => {
+        l('goal').innerHTML = `<span class="enter">Goal: Corrupt the Hard Drive.</span>`;
+    }, 5000);
+    gameState.bps = 1;
+    setInterval(gameLoop, 1000)
+    updateUI()
+}
+function triggerEvent(event){
+    addOutput("Incoming Message, do you accept? (y/n)");
+    setTimeout(() => {
+        if (multiStage.name == "eventHandler" || !gameState.cooldowns[eventToTrigger.id]) {
+            addOutput("<span class=\"error\">Event timed out.</span>");
+            cancel();
+        }
+    }, 30000); // 30 second timeout
+
+    multiStage.active = true;
+    multiStage.name = "eventHandler",
+    multiStage.stage = 0;
+    multiStage.data = {event: event};
+    multiStage.callback = function(response){
+        if (response[0].toLowerCase() === 'y' || response[0].toLowerCase() === 'yes') {
+            gameState.cooldowns[eventToTrigger.id] = now;
+            event.effect();
+        } else {
+            addOutput("Event declined.");
+            cancel();
+        }
+}
+
+function handleEvents(){
+    const now = Date.now();
+    var possibleEffects = [];
+    for (let ev of events) {
+        if (!ev.check()) continue;
+        if (gameState.cooldowns[ev.id] && now - gameState.cooldowns[ev.id] < ev.cooldown) continue;
+        possibleEffects.push(ev);
+    }
+    if (possibleEffects.length === 0) return;
+    const eventToTrigger = possibleEffects[Math.floor(Math.random() * possibleEffects.length)];
+    triggerEvent(eventToTrigger);
+}
+
+
+function gameLoop(){
+    handleEvents();
+    if (!gameState.started) return;
+    // Recalculate BPS
+    let totalBPS = 1; // Base BPS
+    for (let gen of gameState.generators) {
+        totalBPS += gen.rate;
+        // Scale rate based on scaling type
+        if (gen.scaling) {
+            let scaleValue = 0;
+            switch (gen.scaling.type) {
+                case "commandCount":
+                    scaleValue = gameState.stats.commandsRun;
+                    break;
+                case "timeActive":
+                    scaleValue = gameState.stats.timeActive;
+                    break;
+                case "fileCount":
+                    scaleValue = gameState.stats.filesCreated;
+                    break;
+                case "errorCount":
+                    scaleValue = gameState.stats.errorsEncountered;
+                    break;
+                case "userCount":
+                    scaleValue = gameState.stats.usersCreated;
+                    break;
+                case "hostsInfected":
+                    scaleValue = gameState.stats.hostsInfected;
+                    break;
+                default:
+                    scaleValue = 0;
+            }
+            totalBPS += Math.floor(gen.rate * gen.scaling.multiplier * scaleValue);
+        }
+    }
+    gameState.bps = totalBPS;
+    // Add bits
+    gameState.bits += gameState.bps;
+    gameState.corruption += gameState.bps;
+    
+    updateUI()
+}
+
+function updateUI(){
+    var driveUI = l('drive-size');
+    if (!gameState.started) { // Only needs to trigger once
+        driveUI.innerHTML = `<span>Drive Size: <span class="blu">${formatBits(fileSystem.size)}</span></span>`;
+        l('file-count').innerHTML = countFiles();
+    return;
+    }
+
+    // Updates every "tick" 
+    l('bits').innerHTML = gameState.bits;
+    l('bps').innerHTML = gameState.bps;
+    driveUI.innerHTML =  `<span>Drive Size: <br> <span>Corrupted:</span></span><span class="blu">${formatBits(fileSystem.size)}<br><span class="warning">${formatBits(gameState.corruption)}</span></span>`
+    //driveUI.innerHTML = `<span>Drive Size: <span>Corrupted:</span></span><span></span>`; 
+    //driveUI.innerHTML = `<span>Drive Size: <span class="blu">${formatBits(fileSystem.size)}</span></span><span>Corrupted: <span class="warning">  ${formatBits(gameState.corruption)}</span></span>`;
+    l('file-count').innerHTML = countFiles();
+    l('user').innerHTML = gameState.user;
+    l('host').innerHTML = gameState.host;
+    
+}
+
+// Let's get it goinnnn 
+// Handle Events
+document.getElementById('cmd-input').addEventListener('keypress', function(e) {
+if (e.key === 'Enter') {
+    const input = this.value;
+    if (input.trim()) {
+        addToCommands();  
+    }
+    executecmd(input);
+    this.value = '';
+}
+});
+
+document.getElementById('cmd-input').addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowUp') {
+        if (lastCommands.length === 0) return;
+        commandIndex = Math.min(commandIndex + 1, lastCommands.length);
+        this.value = lastCommands[lastCommands.length - commandIndex] || '';
+        e.preventDefault();
+    } else if (e.key === 'ArrowDown') {
+        if (lastCommands.length === 0) return;
+        commandIndex = Math.max(commandIndex - 1, 0);
+        this.value = lastCommands[lastCommands.length - commandIndex] || '';
+        e.preventDefault();
+    }
+});
+// Focus input on click
+document.addEventListener('click', function() {
+    document.getElementById('cmd-input').focus();
+});
+
+
+// Focus input on click
+document.addEventListener('click', function() {
+    document.getElementById('cmd-input').focus();
+});
+onload = function() {
+    loadGame();
+// Initialization
+updateUI();
+updatePrompt();
+document.getElementById('cmd-input').focus();
+
+// Welcome message
+addOutput(`<span class="success">FL-OS Terminal Ready</span>
+Type 'help' for available commands.
+Type 'ls' to see files, or 'cat README.txt' for instructions.`);
+}
+
+window.onload = onload;
+
+console.log(`flowiz.moe ${VERSION} - https://flowiz.moe`);
+console.log(`%c
+                                                                  
+                _                      ____                       
+              /   \\                  /      \\                     
+             '      \\              /          \\                   
+            |       |Oo          o|            |                  
+            \`    \  |OOOo......oOO|   /        |                   
+             \`    \\OOOOOOOOOOOOOOO\//        /                     
+              \\ _o\OOOOOOOOOOOOOOOO//. ___ /                       
+           ______OOOOOOOOOOOOOOOOOOOOOOOo.___                     
+            --- OO'* \`OOOOOOOOOO'*  \`OOOOO--                      
+                OO.   OOOOOOOOO'    .OOOOO o                      
+                \`OOOooOOOOOOOOOooooOOOOOO'OOOo                    
+              .OO "OOOOOOOOOOOOOOOOOOOO"OOOOOOOo                  
+          __ OOOOOO\`OOOOOOOOOOOOOOOO"OOOOOOOOOOOOo                
+         ___OOOOOO___"OOOOOOOOOOO"_OOOOOOOOOOOOOOOO               
+           OOOOO^OOO/\`(____)/"O\\OOOOOOOOOO^OOOOOO                 
+           OOOOO OO/00/000000\O000\\0OOOOOOO OOOOOO                 
+           OOOOO O0000000000000000 ppppoooooOOOOOO                
+           \`OOOOO 0000000000000000 QQQQ "OOOOOOO"                 
+            o"OOOO 000000000000000oooooOOoooooooO'                
+            OOo"OOOO.00000000000000000000OOOOOOOO'                
+           OOOOOO QQQQ 0000000000000000000OOOOOOO                 
+          OOOOOO00eeee00000000000000000000OOOOOOOO.               
+         OOOOOOOO000000000000000000000000OOOOOOOOOO               
+         OOOOOOOOO00000000000000000000000OOOOOOOOOO               
+         \`OOOOOOOOO000000000000000000000OOOOOOOOOOO               
+           "OOOOOOOO0000000000000000000OOOOOOOOOOO'               
+             "OOOOOOO00000000000000000OOOOOOOOOO"                 
+  .ooooOOOOOOOo"OOOOOOO000000000000OOOOOOOOOOO"                   
+.OOO"""""""""".oOOOOOOOOOOOOOOOOOOOOOOOOOOOOo                     
+OOO         QQQQO"'                     \`"QQQQ                    
+OOO                                                               
+\`OOo.                                                             
+  \`"OOOOOOOOOOOOoooooooo.__                                       
+                                                                  
+          Loading . . .                                           
+                                                                  `, `font-family: monospace;background: #222; color: #bada55`);
+
+console.log(`%c
+_______         _____  _  _  _ _____ ______   _______  _____  _______
+|______ |      |     | |  |  |   |    ____/   |  |  | |     | |______
+|       |_____ |_____| |__|__| __|__ /_____ . |  |  | |_____| |______
+                                                         
+   
+`, `font-family: monospace`);
+
+    </script>
+</body>
+</html>

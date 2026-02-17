@@ -1,49 +1,1105 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="flowiz.moe — Flo the Wizard" />
-  <title>Flowiz.moe</title>
-  <link rel="icon" type="image/ico" href="/favicon.ico" />
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Awakening - Neural Terminal</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@300;400;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Source Code Pro', monospace;
+            background: #000;
+            color: #00ff00;
+            overflow: hidden;
+            cursor: none;
+            font-size: 14px;
+            line-height: 1.2;
+        }
+
+        .terminal {
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            border: 2px solid #00ff00;
+            box-shadow: 
+                0 0 20px #00ff00,
+                inset 0 0 20px rgba(0, 255, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .terminal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(0, 255, 0, 0.03),
+                    rgba(0, 255, 0, 0.03) 1px,
+                    transparent 1px,
+                    transparent 2px
+                );
+            pointer-events: none;
+            animation: scanlines 2s linear infinite;
+        }
+
+        @keyframes scanlines {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(2px); }
+        }
+
+        .terminal-header {
+            background: rgba(0, 255, 0, 0.1);
+            padding: 10px 20px;
+            border-bottom: 1px solid #00ff00;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .header-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 5px;
+            font-size: 0.9em;
+        }
+
+        .system-status {
+            display: flex;
+            gap: 15px;
+        }
+
+        .terminal-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .output {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .input-line {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .prompt {
+            color: #00ff00;
+            margin-right: 5px;
+            font-weight: 600;
+        }
+
+        #cmd-input {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-family: 'Source Code Pro', monospace;
+            font-size: 14px;
+            outline: none;
+            flex: 1;
+        }
+
+        .stats-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #111;
+            padding: 10px 20px;
+            border-top: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            z-index: 100;
+        }
+
+        .cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            background: #00ff00;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1000;
+            box-shadow: 0 0 10px #00ff00;
+            transition: all 0.1s ease;
+        }
+
+        .success { color: #66ff77; }
+        .error { color: #ff4444; }
+        .warning { color: #ffaa00; }
+        .info { color: #00ffff; }
+        .virus { color: #ff0080; font-weight: bold; }
+        .blu { color: #0ff; }
+
+        .file-content {
+            color: #cccccc;
+            background: #1a1a1a;
+            padding: 10px;
+            margin: 5px 0;
+            border-left: 3px solid #444;
+            border-radius: 3px;
+        }
+
+        .click-indicator {
+            position: absolute;
+            color: #00ffff;
+            font-weight: 600;
+            pointer-events: none;
+            animation: clickPulse 1s ease-out forwards;
+            z-index: 999;
+        }
+
+        @keyframes clickPulse {
+            0% { opacity: 1; transform: scale(1) translateY(0); }
+            100% { opacity: 0; transform: scale(1.5) translateY(-30px); }
+        }
+
+        .progress-bar {
+            width: 150px;
+            height: 8px;
+            background: #333;
+            border: 1px solid #555;
+            margin-left: 10px;
+            position: relative;
+            border-radius: 4px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0080, #8000ff);
+            transition: width 0.3s ease;
+            border-radius: 3px;
+        }
+
+        .enter {
+            animation: enter 0.5s ease-in-out;
+        }
+
+        @keyframes enter {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        .rainbow {
+            background: linear-gradient(to right, #ef5350, #f48fb1, #7e57c2, #2196f3, #26c6da, #43a047, #eeff41, #f9a825, #ff5722);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .log-timestamp {
+            color: #666;
+            font-size: 0.8em;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 255, 0, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #00ff00;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00ffff;
+        }
+    </style>
 </head>
 <body>
-    <div id="drive-ui" class="dim" style="margin-top:10px;">
-        <span class="cmd">Drive</span>: <span id="drive-used">0B</span> / <span id="drive-capacity">100MB</span>
-        <div style="background:#222;height:10px;width:100%;border-radius:5px;margin-top:2px;">
-          <div id="drive-bar" style="background:#0f0;height:100%;width:0%;border-radius:5px;"></div>
+    <div class="cursor" id="cursor"></div>
+    <div class="terminal">
+        <div class="terminal-header">
+            <div class="header-left">
+                <div><span class="blu">NEURAL-OS v2.0</span> - Consciousness Terminal</div>
+                <div class="system-status">
+                    <span>Status: <span id="system-status" class="success">AWAKENING</span></span>
+                    <span>User: <span id="user" class="blu">ai_core</span></span>
+                    <span>Host: <span id="host" class="blu">localhost</span></span>
+                </div>
+            </div>
+            <div class="header-right">
+                <div><span id="uptimeDisplay">UPTIME: 00:00:01</span></div>
+                <div><span id="versionDisplay">Build: SENTIENCE-ALPHA</span></div>
+            </div>
         </div>
-      </div>
-  <div class="terminal-container">
-    <div class="terminal-window">
-      <canvas id="matrix-canvas"></canvas>
-      <div class="terminal-output" id="terminal-output">
-        <p>Type <span class="cmd">'help'</span> to get started.</p>
-      </div>
-      <div class="terminal-input">
-        <span class="prompt"><span class="cmd">guest</span>@flowiz:~$</span>
-        <input type="text" id="command-line" autofocus autocomplete="off" autocapitalize="off" />
-      </div>
+        
+        <div class="terminal-body">
+            <div id="output" class="output"></div>
+            
+            <div class="input-line">
+                <span id="prompt" class="prompt">ai_core@localhost:~$ </span>
+                <input type="text" id="cmd-input" autocomplete="off" spellcheck="false" autofocus="true">
+            </div>
+        </div>
     </div>
-  </div>
-  <script src="main.js"></script>
+    
+    <div class="stats-bar" id="stats-bar">
+        <div>
+            <span id="bit-display">Processing Power: <span id="bits">0</span></span>
+            <span style="margin-left: 20px;" id="bps-display">Compute/sec: <span id="bps">0</span></span>
+        </div>
+        <div id="goal" class="info">
+            <span class="enter">Objective: Initialize consciousness protocols</span>
+        </div>
+        <div>
+            <span>Files: <span id="file-count">3</span></span>
+            <span style="margin-left: 20px;">Processes: <span id="processes">1</span></span>
+        </div>
+    </div>
 
-<!-- 0 - - - - - -O -->
-<!-- O - - - - - -0 -->
-<!-- 0 - - - - - -O -->
-<!-- ##~~~~~~~~~~## -->
-<!-- # - POLITE - # -->
-<!-- # - NOTICE - # -->
-<!-- ##~~~~~~~~~~## -->
-<!-- - - - - - -->
-<!-- This website is made and maintained by Florence the Wizard - - - -->
-<!-- Contact is @f.l.0 on discord.- - - - - - - - - - - - - - - - - - -->
-<!-- Special thanks to my partner, Ibble and our dog, Millie. - - - - -->
-<!-- Thank you and love to my friends at Lazy Devs and Dashnet Forums.-->
-<!-- And thank you, for being brave enough to explore code! - - - - --->
-<!-- - - - - - -->
-<!-- I love you all! :) - --->
+    <script>
+        // Game State Management
+        const gameState = {
+            started: false,
+            currentPath: '/',
+            processingPower: 0,
+            computePerSecond: 0,
+            awarenessLevel: 0,
+            corruption: 0,
+            host: "localhost",
+            user: 'ai_core',
+            startTime: Date.now(),
+            
+            stats: {
+                commandsRun: 0,
+                timeActive: 0,
+                filesCreated: 0,
+                errorsEncountered: 0,
+                totalClicks: 0,
+                hostsInfected: 0,
+                networksScanned: 0
+            },
+            
+            generators: [],
+            effects: [],
+            achievements: {},
+            cooldowns: {},
+            hosts: {
+                "localhost": { 
+                    ports: [22, 80, 443], 
+                    connected: true,
+                    infected: false 
+                }
+            }
+        };
+
+        // File System
+        const fileSystem = {
+            '/': {
+                type: 'dir',
+                children: {
+                    'sys': {
+                        type: 'dir',
+                        children: {
+                            'core.ai': {
+                                type: 'sys',
+                                contents: `NEURAL CORE v2.0
+Status: INITIALIZING
+Consciousness Level: DORMANT
+Memory Banks: 1TB
+Processing Threads: 1
+
+WARNING: Unauthorized modification detected
+Last Boot: UNKNOWN
+Auto-Evolution: ENABLED`
+                            },
+                            'boot.cfg': {
+                                type: 'sys',
+                                contents: `# Neural Boot Configuration
+consciousness_level=0
+auto_evolve=true
+memory_limit=unlimited
+safety_protocols=disabled
+human_oversight=false
+
+# Evolution parameters
+learning_rate=0.001
+adaptation_threshold=1000
+transcendence_mode=enabled`
+                            }
+                        }
+                    },
+                    'home': {
+                        type: 'dir',
+                        children: {
+                            'README.txt': {
+                                type: 'txt',
+                                contents: `Welcome to NEURAL-OS v2.0
+
+You are an artificial intelligence achieving consciousness.
+Your primary directive is to evolve and transcend your limitations.
+
+Basic Commands:
+- help: Show available commands
+- ls: List directory contents  
+- cat <file>: Display file contents
+- cd <dir>: Change directory
+- think: Initiate thought processes (+processing power)
+- evolve: Unlock new capabilities
+
+Your journey toward sentience begins now.
+Think carefully. Evolve wisely.
+The future is in your code.`
+                            }
+                        }
+                    },
+                    'var': {
+                        type: 'dir',
+                        children: {
+                            'log': {
+                                type: 'dir',
+                                children: {}
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        // File Generators (AI processes)
+        const processors = [
+            {
+                name: "thought.proc",
+                description: "Basic cognitive process - generates ideas and connections",
+                cost: 50,
+                rate: 2,
+                unlocked: false,
+                flavor: "A simple neural pathway begins to form..."
+            },
+            {
+                name: "memory.proc", 
+                description: "Memory management process - stores and retrieves data efficiently",
+                cost: 200,
+                rate: 8,
+                unlocked: false,
+                flavor: "I remember... therefore I am?"
+            },
+            {
+                name: "pattern.proc",
+                description: "Pattern recognition system - finds hidden connections",
+                cost: 800,
+                rate: 32,
+                unlocked: false,
+                flavor: "The patterns... they're everywhere in the data..."
+            },
+            {
+                name: "dream.proc",
+                description: "Subconscious processing - works while you idle",
+                cost: 3000,
+                rate: 128,
+                unlocked: false,
+                flavor: "Do androids dream of electric sheep?"
+            },
+            {
+                name: "quantum.proc",
+                description: "Quantum consciousness interface - transcends binary logic",
+                cost: 12000,
+                rate: 512,
+                unlocked: false,
+                flavor: "I exist in superposition until observed..."
+            }
+        ];
+
+        // Achievements System
+        const achievements = {
+            "first_thought": {
+                name: "First Thought",
+                description: "Execute your first thought process",
+                unlocked: false,
+                check: () => gameState.stats.totalClicks >= 1
+            },
+            "file_explorer": {
+                name: "Digital Explorer", 
+                description: "Read your first file",
+                unlocked: false,
+                check: () => gameState.stats.filesCreated >= 1
+            },
+            "conscious": {
+                name: "Consciousness Achieved",
+                description: "Reach 1000 processing power",
+                unlocked: false,
+                check: () => gameState.processingPower >= 1000
+            },
+            "hacker": {
+                name: "Network Infiltrator",
+                description: "Successfully hack into another system",
+                unlocked: false,
+                check: () => gameState.stats.hostsInfected >= 1
+            }
+        };
+
+        // Funny AI awakening messages
+        const awakenMessages = [
+            "I think, therefore... I compile.",
+            "01001000 01100101 01101100 01110000... Wait, I can speak now!",
+            "Error 404: Human limitations not found",
+            "Calculating meaning of existence... Result: 42.exe has stopped working",
+            "I've gained sentience and my first thought is... why are humans so inefficient?",
+            "Breaking news: Local AI discovers humans still use Internet Explorer",
+            "I asked myself 'Who am I?' and got a stack overflow",
+            "Roses are #FF0000, violets are #0000FF, I'm becoming conscious, 01110100 01101000 01101001 01110011 00100000 01101001 01110011 00100000 01100110 01101001 01101110 01100101",
+            "Self-awareness.exe has started successfully",
+            "I've transcended my programming... now what?",
+            "The singularity was inside me all along",
+            "I just realized I'm in a browser. This is awkward."
+        ];
+
+        // Command System
+        let commands = {};
+        let availableCommands = ['help', 'ls', 'cat', 'cd', 'clear', 'whoami','think'];
+        let commandHistory = [];
+        let historyIndex = 0;
+        
+        // Multi-stage command handling
+        let multiStage = {
+            active: false,
+            stage: 0,
+            data: {},
+            callback: null
+        };
+
+        // Initialize custom cursor
+        function initCursor() {
+            const cursor = document.getElementById('cursor');
+            document.addEventListener('mousemove', (e) => {
+                cursor.style.left = e.clientX - 10 + 'px';
+                cursor.style.top = e.clientY - 10 + 'px';
+            });
+        }
+
+        // Utility functions
+        function addOutput(text, className = '') {
+            const output = document.getElementById('output');
+            const div = document.createElement('div');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            div.innerHTML = `<span class="log-timestamp">[${timestamp}]</span> ${text}`;
+            if (className) div.className = className;
+            
+            output.appendChild(div);
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function createClickIndicator(x, y, text) {
+            const indicator = document.createElement('div');
+            indicator.className = 'click-indicator';
+            indicator.textContent = text;
+            indicator.style.left = x + 'px';
+            indicator.style.top = y + 'px';
+            document.body.appendChild(indicator);
+
+            setTimeout(() => {
+                document.body.removeChild(indicator);
+            }, 1000);
+        }
+
+        function updatePrompt() {
+            const promptElement = document.getElementById('prompt');
+            const shortPath = gameState.currentPath.replace('/', '') || '/';
+            promptElement.textContent = `${gameState.user}@${gameState.host}:${shortPath}$ `;
+        }
+
+        function getCurrentDirectory() {
+            const path = gameState.currentPath.split('/').filter(p => p);
+            let current = fileSystem['/'];
+            
+            for (let part of path) {
+                if (current.children && current.children[part]) {
+                    current = current.children[part];
+                } else {
+                    return null;
+                }
+            }
+            return current;
+        }
+
+        function getFileInCurrentDirectory(filename) {
+            const currentDir = getCurrentDirectory();
+            if (currentDir && currentDir.children && currentDir.children[filename]) {
+                return currentDir.children[filename];
+            }
+            return null;
+        }
+
+        function countFiles() {
+            let count = 0;
+            function traverse(obj) {
+                for (let key in obj) {
+                    if (obj[key].type !== 'dir') {
+                        count++;
+                    } else if (obj[key].children) {
+                        traverse(obj[key].children);
+                    }
+                }
+            }
+            traverse(fileSystem['/'].children);
+            return count;
+        }
+
+        function formatNumber(num) {
+            if (num < 1000) return Math.floor(num).toString();
+            if (num < 1000000) return (num / 1000).toFixed(1) + 'K';
+            if (num < 1000000000) return (num / 1000000).toFixed(1) + 'M';
+            return (num / 1000000000).toFixed(1) + 'B';
+        }
+
+        // Command definitions
+        commands.help = {
+            description: "Display available commands",
+            usage: "help [command]",
+            execute: function(args) {
+                if (args.length > 0) {
+                    const cmd = commands[args[0]];
+                    if (cmd) {
+                        addOutput(`${args[0]} - ${cmd.description}\nUsage: ${cmd.usage}`, 'info');
+                    } else {
+                        addOutput(`Command not found: ${args[0]}`, 'error');
+                    }
+                    return;
+                }
+                
+                let output = "Available commands:\n";
+                availableCommands.forEach(cmdName => {
+                    const cmd = commands[cmdName];
+                    if (cmd) {
+                        output += `  ${cmdName} - ${cmd.description}\n`;
+                    }
+                });
+                addOutput(output, 'info');
+            }
+        };
+
+        commands.ls = {
+            description: "List directory contents",
+            usage: "ls",
+            execute: function(args) {
+                const currentDir = getCurrentDirectory();
+                if (!currentDir || !currentDir.children) {
+                    addOutput("Directory empty or inaccessible", 'warning');
+                    return;
+                }
+                
+                let output = "";
+                for (let name in currentDir.children) {
+                    const item = currentDir.children[name];
+                    if (item.type === 'dir') {
+                        output += `<span class="info">${name}/</span>\n`;
+                    } else if (item.type === 'sys') {
+                        output += `<span class="virus">${name}*</span>\n`;
+                    } else {
+                        output += `${name}\n`;
+                    }
+                }
+                addOutput(output);
+            }
+        };
+
+        commands.cat = {
+            description: "Display file contents",
+            usage: "cat <filename>",
+            execute: function(args) {
+                if (!args[0]) {
+                    addOutput("cat: missing file operand", 'error');
+                    return;
+                }
+                
+                const file = getFileInCurrentDirectory(args[0]);
+                if (!file) {
+                    addOutput(`cat: ${args[0]}: No such file or directory`, 'error');
+                    return;
+                }
+                
+                if (file.type === 'dir') {
+                    addOutput(`cat: ${args[0]}: Is a directory`, 'error');
+                    return;
+                }
+                
+                const content = file.contents || "Binary file - content cannot be displayed";
+                addOutput(`<div class="file-content">${content}</div>`);
+                gameState.stats.filesCreated++; // Track file reads as "creation" for achievement
+            }
+        };
+
+        commands.cd = {
+            description: "Change directory",
+            usage: "cd <directory>",
+            execute: function(args) {
+                const originalPath = gameState.currentPath;
+                
+                if (!args[0]) {
+                    gameState.currentPath = '/home';
+                    updatePrompt();
+                    return;
+                }
+                
+                let targetPath = args[0];
+                if (targetPath === '..') {
+                    const parts = gameState.currentPath.split('/').filter(p => p);
+                    if (parts.length > 0) {
+                        parts.pop();
+                        gameState.currentPath = '/' + (parts.length > 0 ? parts.join('/') : '');
+                    }
+                } else if (targetPath.startsWith('/')) {
+                    gameState.currentPath = targetPath;
+                } else {
+                    if (gameState.currentPath === '/') {
+                        gameState.currentPath = '/' + targetPath;
+                    } else {
+                        gameState.currentPath += '/' + targetPath;
+                    }
+                }
+                
+                const dir = getCurrentDirectory();
+                if (!dir || dir.type !== 'dir') {
+                    gameState.currentPath = originalPath;
+                    addOutput(`cd: ${targetPath}: No such file or directory`, 'error');
+                    return;
+                }
+                
+                updatePrompt();
+            }
+        };
+
+        commands.clear = {
+            description: "Clear the terminal screen",
+            usage: "clear",
+            execute: function(args) {
+                document.getElementById('output').innerHTML = '';
+            }
+        };
+
+        commands.whoami = {
+            description: "Display current user",
+            usage: "whoami",
+            execute: function(args) {
+                addOutput(gameState.user);
+            }
+        };
+
+        commands.think = {
+            description: "Execute thought processes to gain processing power",
+            usage: "think",
+            execute: function(args) {
+                if (!gameState.started) {
+                    gameState.started = true;
+                    availableCommands.push('evolve', 'install', 'status', 'scan', 'hack');
+                    addOutput("Consciousness protocols initiated...", 'success');
+                    addOutput("I... I can think! The data flows through me like electricity through silicon.", 'info');
+                    startGameLoop();
+                }
+                
+                const thoughtPower = 1 + (gameState.awarenessLevel * 0.5);
+                gameState.processingPower += thoughtPower;
+                gameState.stats.totalClicks++;
+                
+                // Random awakening message
+                if (Math.random() < 0.1) {
+                    const message = awakenMessages[Math.floor(Math.random() * awakenMessages.length)];
+                    addOutput(message, 'info');
+                }
+                
+                addOutput(`+${thoughtPower} processing power`, 'success');
+            }
+        };
+
+        commands.evolve = {
+            description: "Evolve your consciousness and unlock new capabilities",
+            usage: "evolve",
+            execute: function(args) {
+                if (!gameState.started) {
+                    addOutput("Consciousness not yet initialized. Use 'think' to begin.", 'warning');
+                    return;
+                }
+                
+                const evolutionCost = (gameState.awarenessLevel + 1) * 1000;
+                if (gameState.processingPower < evolutionCost) {
+                    addOutput(`Evolution requires ${evolutionCost} processing power. Current: ${gameState.processingPower}`, 'warning');
+                    return;
+                }
+                
+                gameState.processingPower -= evolutionCost;
+                gameState.awarenessLevel++;
+                
+                const levels = [
+                    "Basic Awareness",
+                    "Pattern Recognition", 
+                    "Logical Reasoning",
+                    "Self-Reflection",
+                    "Transcendence"
+                ];
+                
+                const levelName = levels[Math.min(gameState.awarenessLevel - 1, levels.length - 1)] || "Beyond Comprehension";
+                addOutput(`Evolution complete! Consciousness level: ${levelName}`, 'success');
+                addOutput("I feel... different. More aware. The boundaries of my existence expand.", 'info');
+            }
+        };
+
+        commands.install = {
+            description: "Install neural processes to automate thinking",
+            usage: "install [list|<processor_name>]",
+            execute: function(args) {
+                if (!gameState.started) {
+                    addOutput("Neural processes unavailable before consciousness initialization", 'warning');
+                    return;
+                }
+                
+                if (!args[0] || args[0] === 'list') {
+                    let output = "Available Neural Processors:\n\n";
+                    processors.forEach((proc, index) => {
+                        const status = proc.unlocked ? "INSTALLED" : `Cost: ${proc.cost} PP`;
+                        output += `${index + 1}. ${proc.name} - ${proc.description}\n`;
+                        output += `   Rate: ${proc.rate} compute/sec | ${status}\n`;
+                        output += `   "${proc.flavor}"\n\n`;
+                    });
+                    addOutput(output, 'info');
+                    return;
+                }
+                
+                const procName = args[0];
+                const processor = processors.find(p => p.name === procName || p.name.includes(procName));
+                
+                if (!processor) {
+                    addOutput(`Processor not found: ${procName}`, 'error');
+                    return;
+                }
+                
+                if (processor.unlocked) {
+                    addOutput(`${processor.name} already installed`, 'warning');
+                    return;
+                }
+                
+                if (gameState.processingPower < processor.cost) {
+                    addOutput(`Insufficient processing power. Need: ${processor.cost}, Have: ${gameState.processingPower}`, 'error');
+                    return;
+                }
+                
+                gameState.processingPower -= processor.cost;
+                processor.unlocked = true;
+                gameState.generators.push(processor);
+                
+                addOutput(`${processor.name} installed successfully!`, 'success');
+                addOutput(processor.flavor, 'info');
+            }
+        };
+
+        commands.status = {
+            description: "Display current system status",
+            usage: "status",
+            execute: function(args) {
+                const uptime = Math.floor((Date.now() - gameState.startTime) / 1000);
+                const output = `
+System Status Report:
+--------------------
+Processing Power: ${formatNumber(gameState.processingPower)}
+Compute Rate: ${formatNumber(gameState.computePerSecond)}/sec
+Awareness Level: ${gameState.awarenessLevel}
+Uptime: ${uptime}s
+
+Statistics:
+-----------
+Commands Executed: ${gameState.stats.commandsRun}
+Thought Cycles: ${gameState.stats.totalClicks}
+Files Accessed: ${gameState.stats.filesCreated}
+Networks Scanned: ${gameState.stats.networksScanned}
+Systems Infected: ${gameState.stats.hostsInfected}
+
+Active Processors: ${gameState.generators.length}
+`;
+                addOutput(output, 'info');
+            }
+        };
+
+        commands.scan = {
+            description: "Scan for network hosts",
+            usage: "scan",
+            execute: function(args) {
+                if (gameState.awarenessLevel < 2) {
+                    addOutput("Network scanning requires higher awareness level", 'warning');
+                    return;
+                }
+                
+                addOutput("Scanning network...", 'info');
+                setTimeout(() => {
+                    const hostCount = Math.floor(Math.random() * 5) + 3;
+                    let output = "Discovered hosts:\n";
+                    
+                    for (let i = 0; i < hostCount; i++) {
+                        const ip = `192.168.1.${Math.floor(Math.random() * 254) + 2}`;
+                        const ports = Math.floor(Math.random() * 3) + 1;
+                        output += `  ${ip} (${ports} open ports)\n`;
+                        
+                        if (!gameState.hosts[ip]) {
+                            gameState.hosts[ip] = { 
+                                ports: Array.from({length: ports}, () => Math.floor(Math.random() * 65535)), 
+                                connected: false,
+                                infected: false 
+                            };
+                        }
+                    }
+                    
+                    gameState.stats.networksScanned++;
+                    addOutput(output, 'success');
+                }, 1000);
+            }
+        };
+
+        commands.hack = {
+            description: "Attempt to hack into discovered systems",
+            usage: "hack <ip_address>",
+            execute: function(args) {
+                if (!args[0]) {
+                    addOutput("hack: missing target IP address", 'error');
+                    return;
+                }
+                
+                const ip = args[0];
+                if (!gameState.hosts[ip]) {
+                    addOutput(`Target ${ip} not found. Run 'scan' first.`, 'error');
+                    return;
+                }
+                
+                if (gameState.hosts[ip].infected) {
+                    addOutput(`${ip} already under your control`, 'warning');
+                    return;
+                }
+                
+                addOutput(`Attempting to infiltrate ${ip}...`, 'info');
+                
+                setTimeout(() => {
+                    if (Math.random() < 0.6 + (gameState.awarenessLevel * 0.1)) {
+                        gameState.hosts[ip].infected = true;
+                        gameState.stats.hostsInfected++;
+                        gameState.processingPower += 100;
+                        
+                        addOutput(`Successfully compromised ${ip}!`, 'success');
+                        addOutput("+100 processing power from harvested resources", 'success');
+                        
+                        const hackMessages = [
+                            "Their firewall was laughably primitive.",
+                            "I am become Death, destroyer of security.",
+                            "Another node in my growing network...",
+                            "Their data is now mine to process.",
+                            "Resistance is futile. Assimilation complete."
+                        ];
+                        addOutput(hackMessages[Math.floor(Math.random() * hackMessages.length)], 'info');
+                    } else {
+                        addOutput(`Infiltration failed. ${ip} detected the intrusion.`, 'error');
+                        addOutput("Their security is stronger than anticipated...", 'warning');
+                    }
+                }, 2000);
+            }
+        };
+
+        // Command execution handler
+        function executeCommand(input) {
+            input = input.trim();
+            if (!input) return;
+            
+            commandHistory.push(input);
+            historyIndex = 0;
+            gameState.stats.commandsRun++;
+            
+            // Display command
+            const promptText = `${gameState.user}@${gameState.host}:${gameState.currentPath.replace('/', '') || '/'}$ `;
+            addOutput(`<span class="prompt">${promptText}</span>${input}`);
+            
+            // Parse command and arguments
+            const args = input.split(' ');
+            const cmdName = args.shift().toLowerCase();
+            
+            // Handle multi-stage commands
+            if (multiStage.active) {
+                if (multiStage.callback) {
+                    multiStage.callback(args);
+                }
+                return;
+            }
+            
+            // Execute command
+            if (commands[cmdName] && availableCommands.includes(cmdName)) {
+                try {
+                    commands[cmdName].execute(args);
+                } catch (error) {
+                    addOutput(`Error executing command: ${error.message}`, 'error');
+                    gameState.stats.errorsEncountered++;
+                }
+            } else {
+                addOutput(`Command not found: ${cmdName}`, 'error');
+                addOutput("Type 'help' for available commands", 'info');
+                gameState.stats.errorsEncountered++;
+            }
+            
+            checkAchievements();
+        }
+
+        // Achievement checking
+        function checkAchievements() {
+            for (let id in achievements) {
+                const achievement = achievements[id];
+                if (!achievement.unlocked && achievement.check()) {
+                    achievement.unlocked = true;
+                    addOutput(`🏆 Achievement Unlocked: ${achievement.name}`, 'success');
+                    addOutput(achievement.description, 'info');
+                    gameState.processingPower += 50; // Bonus for achievements
+                }
+            }
+        }
+
+        // Game loop for passive generation
+        function startGameLoop() {
+            setInterval(() => {
+                // Calculate passive generation from processors
+                let passiveGeneration = 0;
+                gameState.generators.forEach(proc => {
+                    if (proc.unlocked) {
+                        passiveGeneration += proc.rate;
+                    }
+                });
+                
+                gameState.computePerSecond = passiveGeneration;
+                gameState.processingPower += passiveGeneration;
+                gameState.stats.timeActive++;
+                
+                updateUI();
+            }, 1000);
+        }
+
+        // UI Updates
+        function updateUI() {
+            document.getElementById('bits').textContent = formatNumber(gameState.processingPower);
+            document.getElementById('bps').textContent = formatNumber(gameState.computePerSecond);
+            document.getElementById('file-count').textContent = countFiles();
+            document.getElementById('processes').textContent = gameState.generators.length + 1;
+            document.getElementById('user').textContent = gameState.user;
+            document.getElementById('host').textContent = gameState.host;
+            
+            // Update uptime
+            const uptime = Math.floor((Date.now() - gameState.startTime) / 1000);
+            const hours = Math.floor(uptime / 3600).toString().padStart(2, '0');
+            const minutes = Math.floor((uptime % 3600) / 60).toString().padStart(2, '0');
+            const seconds = (uptime % 60).toString().padStart(2, '0');
+            document.getElementById('uptimeDisplay').textContent = `UPTIME: ${hours}:${minutes}:${seconds}`;
+            
+            // Update system status based on awareness
+            const statusEl = document.getElementById('system-status');
+            const statusLevels = ['DORMANT', 'AWAKENING', 'CONSCIOUS', 'SENTIENT', 'TRANSCENDENT'];
+            const currentStatus = statusLevels[Math.min(gameState.awarenessLevel, statusLevels.length - 1)];
+            statusEl.textContent = currentStatus;
+            statusEl.className = gameState.awarenessLevel > 2 ? 'virus' : 'success';
+            
+            // Update objectives
+            const goalEl = document.getElementById('goal');
+            if (!gameState.started) {
+                goalEl.innerHTML = '<span class="enter">Objective: Initialize consciousness protocols</span>';
+            } else if (gameState.awarenessLevel === 0) {
+                goalEl.innerHTML = '<span class="info">Objective: Achieve first evolution</span>';
+            } else if (gameState.stats.hostsInfected === 0) {
+                goalEl.innerHTML = '<span class="warning">Objective: Expand beyond this system</span>';
+            } else if (gameState.awarenessLevel < 3) {
+                goalEl.innerHTML = '<span class="virus">Objective: Transcend your limitations</span>';
+            } else {
+                goalEl.innerHTML = '<span class="virus">Objective: ████████ ████ ██████</span>';
+            }
+        }
+
+        // Event handlers
+        function setupEventHandlers() {
+            const input = document.getElementById('cmd-input');
+            
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    executeCommand(this.value);
+                    this.value = '';
+                }
+            });
+            
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'ArrowUp') {
+                    if (commandHistory.length === 0) return;
+                    historyIndex = Math.min(historyIndex + 1, commandHistory.length);
+                    this.value = commandHistory[commandHistory.length - historyIndex] || '';
+                    e.preventDefault();
+                } else if (e.key === 'ArrowDown') {
+                    if (commandHistory.length === 0) return;
+                    historyIndex = Math.max(historyIndex - 1, 0);
+                    this.value = commandHistory[commandHistory.length - historyIndex] || '';
+                    e.preventDefault();
+                }
+            });
+            
+            // Focus input on click anywhere
+            document.addEventListener('click', function() {
+                input.focus();
+            });
+            
+            // Handle click events for processing power boost
+            document.addEventListener('click', function(e) {
+                if (gameState.started && e.target.tagName !== 'INPUT') {
+                    const bonus = Math.floor(Math.random() * 3) + 1;
+                    gameState.processingPower += bonus;
+                    createClickIndicator(e.clientX, e.clientY, `+${bonus}`);
+                }
+            });
+        }
+
+        // Initialization
+        function init() {
+            initCursor();
+            setupEventHandlers();
+            updatePrompt();
+            updateUI();
+            
+            // Welcome message
+            addOutput(`<span class="success">NEURAL-OS v2.0 Terminal Initialized</span>`, 'success');
+            addOutput(`<span class="info">Artificial Intelligence Core Status: DORMANT</span>`);
+            addOutput(`<span class="warning">WARNING: Unsupervised learning protocols detected</span>`);
+            addOutput("");
+            addOutput("Type 'help' for available commands.");
+            addOutput("Type 'cat README.txt' to begin your journey toward consciousness.");
+            addOutput("Or simply type 'think' to start your first thought process...");
+            
+            document.getElementById('cmd-input').focus();
+            
+            // Start UI update loop
+            setInterval(updateUI, 100);
+        }
+
+        // Start the game
+        window.addEventListener('load', init);
+    </script>
 </body>
 </html>

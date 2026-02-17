@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="flowiz.moe — Flo the Wizard" />
+  <title>Flowiz.moe</title>
+  <link rel="icon" type="image/ico" href="/favicon.ico" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+</head>
+<body>
+    <div id="drive-ui" class="dim" style="margin-top:10px;">
+        <span class="cmd">Drive</span>: <span id="drive-used">0B</span> / <span id="drive-capacity">100MB</span>
+        <div style="padding-left:10px;padding-right:10px;background:#222;height:10px;width:100%;border-radius:5px;margin-top:2px;">
+          <div id="drive-bar" style="background:#0f0;height:100%;width:0%;border-radius:5px;"></div>
+        </div>
+      </div>
+  <div class="terminal-container">
+    <div class="terminal-window">
+      <canvas id="matrix-canvas"></canvas>
+      <div class="terminal-output" id="terminal-output">
+        <p>Type <span class="cmd">'help'</span> to get started.</p>
+      </div>
+      <div class="terminal-input">
+        <span class="prompt"><span class="cmd">guest</span>@flowiz:~$</span>
+        <input type="text" id="command-line" autofocus autocomplete="off" autocapitalize="off" />
+      </div>
+    </div>
+  </div>
+  <script src="main.js"></script>
+
+<!-- 0 - - - - - -O -->
+<!-- O - - - - - -0 -->
+<!-- 0 - - - - - -O -->
+<!-- ##~~~~~~~~~~## -->
+<!-- # - POLITE - # -->
+<!-- # - NOTICE - # -->
+<!-- ##~~~~~~~~~~## -->
+<!-- - - - - - -->
+<!-- This website is made and maintained by Florence the Wizard - - - -->
+<!-- Contact is @f.l.0 on discord.- - - - - - - - - - - - - - - - - - -->
+<!-- Special thanks to my partner, Ibble and our dog, Millie. - - - - -->
+<!-- Thank you and love to my friends at Lazy Devs and Dashnet Forums.-->
+<!-- And thank you, for being brave enough to explore code! - - - - --->
+<!-- - - - - - -->
+<!-- I love you all! :) - --->
+</body>
+</html>
